@@ -1,35 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useReducer } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  //initState
+  const initState = {
+    task: "",
+    tasks: [],
+  };
 
+  //action
+  const SET_TASK = "set_task";
+  const ADD_TASK = "add_task";
+  const DELETE_TASK = "delete_task";
+
+  //
+  const setTask = (payload) => ({ type: SET_TASK, payload });
+  const addTask = (payload) => ({ type: ADD_TASK, payload });
+  const deleteTask = (payload) => ({ type: DELETE_TASK, payload });
+  //reducer
+  const reducer = (state, action) => {
+    switch (action.type) {
+      case SET_TASK:
+        return {
+          ...state,
+          task: action.payload,
+        };
+      case ADD_TASK:
+        return {
+          task: "",
+          tasks: [...state.tasks, action.payload],
+        };
+      case DELETE_TASK:
+        state.tasks.splice(action.payload, 1);
+        return { ...state, tasks: state.tasks };
+      default:
+        throw new Error("Invalid action");
+    }
+  };
+
+  const [state, dispatch] = useReducer(reducer, initState);
+  const { task, tasks } = state;
   return (
     <>
+      <h1>Todo list</h1>
+      <div
+        style={{
+          padding: "10px",
+          border: ".1rem solid gray",
+          borderRadius: ".5rem",
+        }}
+      >
+        <input
+          value={task}
+          style={{ fontSize: "20px", padding: "7px", marginRight: "10px" }}
+          onChange={(e) => dispatch(setTask(e.target.value))}
+        />
+        <button onClick={() => dispatch(addTask(task))}>Add</button>
+      </div>
+
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <ul>
+          {tasks.map((item, index) => {
+            return (
+              <li key={index}>
+                {item}{" "}
+                <span
+                  style={{ fontSize: "20px" }}
+                  onClick={() => dispatch(deleteTask(index))}
+                >
+                  &times;
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
